@@ -18,6 +18,7 @@ void dropEvent(DropEvent theDropEvent) {
     json = new JSONObject();
     json.setString("filePath", theDropEvent.toString());
     saveJSONObject(json, "data/filePath.json"); 
+    imageFilePath = theDropEvent.toString();
     println("json saved");
   }
 }

@@ -16,6 +16,7 @@ PImage dimg;  //for drag and drop function
 PImage img;   //for displaying and sending image
 PImage oimg;  //for displaying original image
 PImage simg;  //keeping original size image
+PImage bwimg;  // black and white image for save as file
 PImage title;
 PImage dataModeImage;
 PImage negativeButtonImg;
@@ -47,6 +48,7 @@ int row = 64;
 int knitSize = 64;
 int size;
 float rowRatio = 1.0;
+float ratioOffset = 1;
 int maxColumn = 200;
 int maxRow = 200;
 int[][] pixelBin = new int[row][column];
@@ -114,10 +116,11 @@ void setup() {
 
   // load parameters from json
   params = loadJSONObject("params.json");
-  threshold = params.getInt("threshold");
-  knitSize = params.getInt("knitSize");
-  carriageMode = params.getInt("carriageMode");
-  shiftPos = params.getInt("shiftPos");
+  if( !params.isNull("threshold")) threshold = params.getInt("threshold");
+  if( !params.isNull("knitSize")) knitSize = params.getInt("knitSize");
+  if( !params.isNull("carriageMode")) carriageMode = params.getInt("carriageMode");
+  if( !params.isNull("shiftPos")) shiftPos = params.getInt("shiftPos");
+  if( !params.isNull("ratioOffset")) ratioOffset =  params.getFloat("ratioOffset");
 
   cp5setup();
   drop = new SDrop(this);
@@ -195,6 +198,7 @@ void cp5setup() {
     .setAutoClear(false);
 
   cp5.addButton("Connect")
+    .setCaptionLabel("save as png")
     .setPosition(GUIxPos, 621)
     .setSize(300, 30);
 
@@ -326,29 +330,35 @@ void draw() {
     }
     if (img != null) {
       img = simg.get(0, 0, simg.width, simg.height);
-      if (simg.height > simg.width) {
-        rowRatio = simg.height/simg.width;
-        row = int(column*rowRatio);
-      } else if (simg.height <= simg.width) {
-        rowRatio = simg.width/simg.height;
-        row = int(column/rowRatio);
+      rowRatio = float(simg.height)/float(simg.width);
+
+      if (simg.height < simg.width) {
+        rowRatio = 1.0/rowRatio;
       }
+      rowRatio *= ratioOffset;
+      
+      row = int(column*rowRatio);
+      println(column, row, rowRatio,  simg.height, simg.width);
+      
       //      println(row);
       img.resize(column, row);
       img.updatePixels();
       img.loadPixels();
+      bwimg = createImage(column, row, RGB);
 
       // println(row);
       //converting Image to black and white(1/0)array in "pixelBin[][]"
       pixelBin = new int[row][column];
       for (int i=0; i<row; i++) {
         for (int j=0; j<column; j++) {
-          color c = img.pixels[(i*column)+j]; // error sometimes
+          color c = img.get(j, i); 
           int b = int(brightness(c));
           if (b > threshold) {
             pixelBin[i][j] = 1;
+            bwimg.set(j, i, #FFFFFF);
           } else if (b <= threshold) {
             pixelBin[i][j] = 0;
+            bwimg.set(j, i, #000000);
           }
         }
       }
@@ -584,7 +594,7 @@ void draw() {
   fill(0, 0, 100);
   //  text(": " + savedCue, GUIxPos+260, 586);
   //labal of button
-  text("SHIFT:"+shiftPos, GUIxPos+5, 550);
+  text("RATIO:"+Math.round(ratioOffset*100), GUIxPos+5, 550);
 
   //scroll indicator
   noStroke();
@@ -617,6 +627,7 @@ void dispose() {
   params.setInt("threshold", threshold);
   params.setInt("carriageMode", carriageMode);
   params.setInt("shiftPos", shiftPos);
+  params.setFloat("ratioOffset", ratioOffset);
   saveJSONObject(params, "data/params.json");
   println(storeBin.length);
 }

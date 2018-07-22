@@ -1,19 +1,9 @@
 public void Connect() {
-  String portName = Serial.list()[6]; // you might need 
-  println(Serial.list());
-  port = new Serial(this, portName, 57600);
-  port.clear();
+  String pngImage = imageFilePath + "_BlackAndWith" + bwimg.width + "x" + bwimg.height +".png";
+  bwimg.updatePixels();
+  bwimg.save(pngImage);
+  println(imageFilePath, "saved as png to: ", pngImage);
   done.trigger();
-  cp5.remove("Connect");
-  ControlFont cfont = new ControlFont(pfont, 16); 
-
-  cp5.addButton("Send_to_KnittingMachine")
-    .setPosition(GUIxPos, 621)
-    .setSize(300, 30);
-  cp5.getController("Send_to_KnittingMachine")
-    .getCaptionLabel()
-    .setFont(cfont)
-    .setSize(16);
 }
 
 public void Send_to_KnittingMachine(int theValue) {

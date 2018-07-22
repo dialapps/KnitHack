@@ -19,24 +19,26 @@ public void Reset(int theValue) {
   reset.trigger();
 }
 
-public void up(int theValue) {
+public void up() {
   displayStartRow -= 10;
   if (displayStartRow < 0) displayStartRow = 0;
 }
 
-public void down(int theValue) {
+public void down() {
   displayStartRow += 10;
   if (displayStartRow > (row-200)) displayStartRow = row-200;
 }
 
-public void left(int theValue) {
-  shiftPos--;
-  println(shiftPos);
+public void left() {
+  ratioOffset -= .01;
+  if( ratioOffset < 0.0) {ratioOffset = 0.0;} 
+  println(ratioOffset);
 }
 
-public void right(int theValue) {
-  shiftPos++;
-  println(shiftPos);
+public void right() {
+  ratioOffset += .01; 
+  if( ratioOffset > 2.0) {ratioOffset = 2.0;} 
+  println(ratioOffset);
 }
 
 
